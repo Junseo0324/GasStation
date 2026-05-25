@@ -52,6 +52,80 @@
 
 ---
 
+## 🔄 데이터 흐름 & MVI 아키텍처
+
+앱은 MVI(Model-View-Intent)와 Clean Architecture에 기반하여 단방향 데이터 흐름(UDF)을 따릅니다.
+
+```mermaid
+graph TD
+    %% Presentation Layer
+    subgraph Presentation Layer [Presentation Layer]
+        View[Compose View] -- User Action (Intent) --> ViewModel[ViewModel]
+        ViewModel -- UI State / Effect --> View
+    end
+
+    %% Domain Layer
+    subgraph Domain Layer [Domain Layer]
+        ViewModel -- Execute --> UseCase[UseCase]
+        UseCase -- Request Data --> Repository[Repository Interface]
+    end
+
+    %% Data Layer
+    subgraph Data Layer [Data Layer]
+        RepositoryImpl[Repository Implementation] -- Implements --> Repository
+        RepositoryImpl -- Query --> LocalDataSource[Local DataSource Room / DataStore]
+        RepositoryImpl -- Fetch --> RemoteDataSource[Remote DataSource Retrofit]
+    end
+
+    %% Data flow back
+    RemoteDataSource -- DTO --> RepositoryImpl
+    LocalDataSource -- Entity --> RepositoryImpl
+    RepositoryImpl -- Mapping to Domain Model --> UseCase
+    UseCase -- Result --> ViewModel
+```
+
+---
+
+## 💉 DI (Dependency Injection) 구조
+
+Hilt를 사용하여 종속성 주입을 관리하며, 다음과 같이 3개의 모듈로 나누어 제공합니다.
+
+```mermaid
+graph TD
+    subgraph Hilt Container [SingletonComponent]
+        NetworkModule[NetworkModule] -->|Provides| OpinetService[OpinetService (Retrofit)]
+        
+        DataModule[DataModule] -->|Provides| StationDatabase[StationDatabase (Room)]
+        DataModule -->|Provides| StationDao[StationDao]
+        DataModule -->|Provides| DataStore[DataStore (Preferences)]
+        DataModule -->|Provides| StationRepository[StationRepository (Dev / Prod 분기)]
+        DataModule -->|Provides| UserPreferenceRepository[UserPreferenceRepository]
+        
+        LocationModule[LocationModule] -->|Provides| LocationTracker[LocationTracker (GPS)]
+    end
+
+    StationRepository -->|Inject| UseCases[UseCases]
+    LocationTracker -->|Inject| UseCases
+    UserPreferenceRepository -->|Inject| UseCases
+    UseCases -->|Inject| ViewModels[ViewModels]
+```
+
+* **DataModule의 분기 처리:** `BuildConfig.IS_DEV` 환경에 따라 개발 환경(`dev`)에서는 Mock 데이터를 반환하는 `MockStationRepositoryImpl`을 주입하고, 실서비스 환경(`prod`)에서는 `StationRepositoryImpl`을 주입하도록 구성되어 있습니다.
+
+---
+
+## 📦 모듈 구조 (Module Structure)
+
+현재 프로젝트는 단일 Gradle 모듈로 구성되어 있으며, Clean Architecture 계층 구조가 패키지 수준에서 분리되어 관리됩니다.
+
+* **`:app` (단일 모듈)**
+  * **`core/`**: DI 설정 (`di`), 라우팅 및 네비게이션 (`navigation`), 유틸리티 (`util`)
+  * **`data/`**: 로컬 DB (`local`), 서버 통신 (`remote`), 위치 추적 (`location`), 매퍼 (`mapper`), 데이터 저장소 구현체 (`repository`)
+  * **`domain/`**: 위치 인터페이스 (`location`), 도메인 모델 (`model`), 데이터 저장소 인터페이스 (`repository`), 비즈니스 로직 (`usecase`)
+  * **`presentation/`**: UI 컴포넌트 (`component`), 디자인 테마 (`designsystem`), 각 화면 (`home`, `map`, `detail`, `favorite`, `settings`) 및 메인 진입점 (`main`)
+
+---
+
 ## 🛠️ 기술 스택
 
 | 카테고리 | 기술 |
