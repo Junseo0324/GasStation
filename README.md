@@ -93,15 +93,15 @@ Hilt를 사용하여 종속성 주입을 관리하며, 다음과 같이 3개의 
 ```mermaid
 graph TD
     subgraph Hilt Container [SingletonComponent]
-        NetworkModule[NetworkModule] -->|Provides| OpinetService[OpinetService (Retrofit)]
+        NetworkModule[NetworkModule] -->|Provides| OpinetService["OpinetService (Retrofit)"]
         
-        DataModule[DataModule] -->|Provides| StationDatabase[StationDatabase (Room)]
+        DataModule[DataModule] -->|Provides| StationDatabase["StationDatabase (Room)"]
         DataModule -->|Provides| StationDao[StationDao]
-        DataModule -->|Provides| DataStore[DataStore (Preferences)]
-        DataModule -->|Provides| StationRepository[StationRepository (Dev / Prod 분기)]
+        DataModule -->|Provides| DataStore["DataStore (Preferences)"]
+        DataModule -->|Provides| StationRepository["StationRepository (Dev / Prod 분기)"]
         DataModule -->|Provides| UserPreferenceRepository[UserPreferenceRepository]
         
-        LocationModule[LocationModule] -->|Provides| LocationTracker[LocationTracker (GPS)]
+        LocationModule[LocationModule] -->|Provides| LocationTracker["LocationTracker (GPS)"]
     end
 
     StationRepository -->|Inject| UseCases[UseCases]
