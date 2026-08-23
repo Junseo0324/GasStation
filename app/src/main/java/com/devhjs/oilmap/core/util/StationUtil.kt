@@ -1,5 +1,9 @@
 package com.devhjs.oilmap.core.util
 
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
 /**
  * 오피넷 브랜드 코드를 한글 브랜드명으로 변환합니다.
  */
@@ -22,7 +26,7 @@ fun getBrandName(code: String): String = when (code) {
  */
 fun formatUpdateTime(lastUpdated: Long?): String {
     return lastUpdated?.let {
-        val sdf = java.text.SimpleDateFormat("HH:mm", java.util.Locale.KOREA)
-        "${sdf.format(java.util.Date(it))} 기준"
+        val sdf = SimpleDateFormat("HH:mm", Locale.KOREA)
+        "${sdf.format(Date(it))} 기준"
     } ?: "정보 없음"
 }
