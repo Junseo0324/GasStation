@@ -54,7 +54,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = false
-            isShrinkResources = true
+//            isShrinkResources = true  // minify가 꺼져 있으면 사용할 수 없음
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"

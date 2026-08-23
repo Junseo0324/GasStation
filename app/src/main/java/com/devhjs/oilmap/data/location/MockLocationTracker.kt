@@ -22,7 +22,14 @@ class MockLocationTracker @Inject constructor() : LocationTracker {
         return mockLocation
     }
 
-    override fun getLocationUpdates(intervalMillis: Long): Flow<Location?> {
+    /**
+     * 항상 같은 좌표를 방출하므로 이동 거리가 0입니다.
+     * 따라서 dev 빌드에서는 위치 변화로 인한 재조회가 발생하지 않습니다.
+     */
+    override fun getLocationUpdates(
+        intervalMillis: Long,
+        minUpdateDistanceMeters: Float
+    ): Flow<Location?> {
         return flow {
             while (true) {
                 emit(getCurrentLocation())
